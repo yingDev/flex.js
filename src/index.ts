@@ -104,6 +104,7 @@ export class Flex
 			FlexDirection[this.direction]   << 20|
 			FlexWrap[this.wrap]  		    << 24
 		);
+		(d & Misc) && FLEX.set_misc(this.grow, this.shrink, this.order, this.basis);
 
 		this._dirtyFlag = 0;
 
