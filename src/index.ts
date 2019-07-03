@@ -225,26 +225,3 @@ export class FlexItem
 			throw "item has been destroyed";
 	}
 }
-
-
-
-
-let btn = document.getElementById("shit");
-btn.addEventListener("click",()=>
-{
-	let a = new FlexItem();
-	let child = new FlexItem();
-	child.width = 100;
-	child.height = 100;
-	child.commitProps();
-	a.add(child);
-
-	a.justify_content = FlexAlign.center;
-	a.align_items = FlexAlign.center;
-	a.width = 123;
-	a.height = 456;
-	a.layout();
-
-	console.log(child.frameX);
-	console.log(child.frameY);
-});
