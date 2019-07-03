@@ -142,9 +142,10 @@ export class FlexItem
 		if(child._parent)
 			throw "this item is other item's child.";
 
-		child._index = this._children.length;// FLEX.count(this._item);
+		let children = this._children;
+		child._index = children.length;// FLEX.count(this._item);
 		child._parent = this;
-		this._children.push(child);
+		children.push(child);
 		FLEX.add(this._item, child._item);
 	}
 
@@ -178,11 +179,11 @@ export class FlexItem
 		if(child._parent !== this)
 			throw "not a child";
 
-		let arr = this._children;
+		let children = this._children;
 		let index = child._index;
 
-		for(let i=index, len = arr.length; i<len; i++)
-			(arr[i] = arr[i+1])._index -= 1;
+		for(let i=index, len = children.length; i<len; i++)
+			(children[i] = children[i+1])._index -= 1;
 		child._parent = null;
 		child._index = -1;
 
