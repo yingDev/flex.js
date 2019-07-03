@@ -62,6 +62,8 @@ export class FlexItem
 	private _children: Array<FlexItem> = [];
 	private _parent: FlexItem = null;
 
+	data:any = null;
+
 	@dirty("Size") width = NaN;
 	@dirty("Size") height = NaN;
 
@@ -93,14 +95,15 @@ export class FlexItem
 	@dirty("Misc") order = 0;
 	@dirty("Misc") basis = NaN;
 
-	get parent() { return this._parent; }
-	get index() { return this._index; }
-	get childCount() { return this._children.length; }
-
 	get frameX():number { return FLEX.get_frame_x(this._item); }
 	get frameY():number { return FLEX.get_frame_y(this._item); }
 	get frameWidth():number { return FLEX.get_frame_width(this._item); }
 	get frameHeight():number { return FLEX.get_frame_height(this._item); }
+
+	get parent() { return this._parent; }
+	get index() { return this._index; }
+	get children() : ReadonlyArray<FlexItem> { return this._children; }
+	get dirtyFlags() { return this._dirtyFlag; }
 
 	constructor()
 	{
@@ -149,6 +152,13 @@ export class FlexItem
 		FLEX.add(this._item, child._item);
 	}
 
+	removeSelf()
+	{
+		this._checkDestroyed();
+		if(this.parent)
+			this.parent.remove(this);
+	}
+
 	insert(child: FlexItem, index:number)
 	{
 		this._checkDestroyed();
@@ -182,8 +192,9 @@ export class FlexItem
 		let children = this._children;
 		let index = child._index;
 
-		for(let i=index, len = children.length; i<len; i++)
+		for(let i=index, len = children.length-1; i<len; i++)
 			(children[i] = children[i+1])._index -= 1;
+		children.pop();
 		child._parent = null;
 		child._index = -1;
 
@@ -193,6 +204,9 @@ export class FlexItem
 	layout()
 	{
 		this._checkDestroyed();
+		if(this._children.length == 0)
+			return;
+
 		this.commitProps();
 		FLEX.layout(this._item);
 	}

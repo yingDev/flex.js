@@ -73,6 +73,14 @@ void flex_item_set_misc(size_t item, float grow, float shrink, int order, float 
     flex_item_set_basis(item, basis);
 }
 
+void flex_item_get_frame_temp(size_t item, size_t out)
+{
+	float* frame = (float*)out;
+	frame[0] = flex_item_get_frame_x(item);
+	frame[1] = flex_item_get_frame_y(item);
+	frame[2] = flex_item_get_frame_width(item);
+	frame[3] = flex_item_get_frame_height(item);
+}
 
 #define BIND_FLEX_ATTRIBUTE(name) \
     function("get_"#name, &flex_item_get_##name); \
@@ -103,6 +111,7 @@ EMSCRIPTEN_BINDINGS(_)
 	function("set_uni_margin", &flex_item_set_uni_margin);
 	function("set_uni_padding", &flex_item_set_uni_padding);
 	function("set_misc", &flex_item_set_misc);
+	function("get_frame_temp", &flex_item_get_frame_temp);
 
 	BIND_FLEX_ATTRIBUTE(width)
     BIND_FLEX_ATTRIBUTE(height)
