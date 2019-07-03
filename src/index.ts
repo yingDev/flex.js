@@ -33,54 +33,71 @@ export enum FlexWrap
 	wrap_reverse
 }
 
-function dirty():any
-{
 
-}
 
 enum DirtyFlag
 {
 	Size=1, Location=2, Padding=4, Margin=8, Enums=16, Misc=32
 }
 
-export class Flex
+const dirty = (type:keyof typeof DirtyFlag):any => (target, prop, desc) =>
 {
-	constructor() {}
+	const field = '_'+prop;
+	const flag = DirtyFlag[type];
+	return {
+		get() { return this[field]; },
+		set(value)
+		{
+			if(this[field] === value)
+				return;
+			this[field] = value;
+			this._inited && (this._dirtyFlag &= flag);
+		}
+	}
+};
 
+export class FlexItem
+{
+	private _inited = false;
 	private _index = -1;
 	private _item = FLEX.create();
 	private _dirtyFlag = 0;
 
-	width = NaN;
-	height = NaN;
+	@dirty("Size") width = NaN;
+	@dirty("Size") height = NaN;
 
-	left = NaN;
-	right = NaN;
-	top = NaN;
-	bottom = NaN;
+	@dirty("Location") left = NaN;
+	@dirty("Location") right = NaN;
+	@dirty("Location") top = NaN;
+	@dirty("Location") bottom = NaN;
 
-	padding_left = 0.0;
-	padding_right = 0.0;
-	padding_top = 0.0;
-	padding_bottom = 0.0;
+	@dirty("Padding") padding_left = 0.0;
+	@dirty("Padding") padding_right = 0.0;
+	@dirty("Padding") padding_top = 0.0;
+	@dirty("Padding") padding_bottom = 0.0;
 
-	margin_left = 0.0;
-	margin_right = 0.0;
-	margin_top = 0.0;
-	margin_bottom = 0.0;
+	@dirty("Margin") margin_left = 0.0;
+	@dirty("Margin") margin_right = 0.0;
+	@dirty("Margin") margin_top = 0.0;
+	@dirty("Margin") margin_bottom = 0.0;
 
-	justify_content: keyof typeof FlexAlign = "start";
-	align_content: keyof typeof FlexAlign = "stretch";
-	align_items: keyof typeof FlexAlign = "stretch";
-	align_self: keyof typeof FlexAlign = "auto";
-	position: keyof typeof FlexPosition = "relative";
-	direction: keyof typeof FlexDirection = "column";
-	wrap: keyof typeof FlexWrap = "no_wrap";
+	@dirty("Enums") justify_content: keyof typeof FlexAlign = "start";
+	@dirty("Enums") align_content: keyof typeof FlexAlign = "stretch";
+	@dirty("Enums") align_items: keyof typeof FlexAlign = "stretch";
+	@dirty("Enums") align_self: keyof typeof FlexAlign = "auto";
+	@dirty("Enums") position: keyof typeof FlexPosition = "relative";
+	@dirty("Enums") direction: keyof typeof FlexDirection = "column";
+	@dirty("Enums") wrap: keyof typeof FlexWrap = "no_wrap";
 
-	grow = 0.0;
-	shrink = 1.0;
-	order = 0;
-	basis = NaN;
+	@dirty("Misc") grow = 0.0;
+	@dirty("Misc") shrink = 1.0;
+	@dirty("Misc") order = 0;
+	@dirty("Misc") basis = NaN;
+
+	constructor()
+	{
+		this._inited = true;
+	}
 
 	commit()
 	{
@@ -107,11 +124,10 @@ export class Flex
 		(d & Misc) && FLEX.set_misc(this.grow, this.shrink, this.order, this.basis);
 
 		this._dirtyFlag = 0;
-
 	}
 
 
-	add(child: Flex)
+	add(child: FlexItem)
 	{
 		this._checkDestroyed();
 		this._index = FLEX.count();
@@ -128,7 +144,7 @@ export class Flex
 		this._index = -1;
 	}
 
-	set(value: Partial<Flex>)
+	set(value: Partial<FlexItem>)
 	{
 		this._checkDestroyed();
 		Object.assign(this, value);
