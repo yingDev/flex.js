@@ -33,8 +33,6 @@ export enum FlexWrap
 	wrap_reverse
 }
 
-
-
 enum DirtyFlag
 {
 	Size=1, Location=2, Padding=4, Margin=8, Enums=16, Misc=32
@@ -51,17 +49,18 @@ const dirty = (type:keyof typeof DirtyFlag):any => (target, prop, desc) =>
 			if(this[field] === value)
 				return;
 			this[field] = value;
-			this._inited && (this._dirtyFlag &= flag);
+			this._dirtyFlag &= flag;
 		}
 	}
 };
 
 export class FlexItem
 {
-	private _inited = false;
 	private _index = -1;
 	private _item = FLEX.create();
 	private _dirtyFlag = 0;
+	private _children: Array<FlexItem> = [];
+	private _parent: FlexItem = null;
 
 	@dirty("Size") width = NaN;
 	@dirty("Size") height = NaN;
@@ -94,12 +93,21 @@ export class FlexItem
 	@dirty("Misc") order = 0;
 	@dirty("Misc") basis = NaN;
 
+	get parent() { return this._parent; }
+	get index() { return this._index; }
+	get childCount() { return this._children.length; }
+
+	get frameX():number { return FLEX.get_frame_x(this._item); }
+	get frameY():number { return FLEX.get_frame_y(this._item); }
+	get frameWidth():number { return FLEX.get_frame_width(this._item); }
+	get frameHeight():number { return FLEX.get_frame_height(this._item); }
+
 	constructor()
 	{
-		this._inited = true;
+		this._dirtyFlag = 0;
 	}
 
-	commit()
+	commitProps()
 	{
 		let d = this._dirtyFlag;
 		if(d == 0)
@@ -126,37 +134,87 @@ export class FlexItem
 		this._dirtyFlag = 0;
 	}
 
-
 	add(child: FlexItem)
 	{
 		this._checkDestroyed();
-		this._index = FLEX.count();
+		child._checkDestroyed();
+		if(child._parent)
+			throw "this item is other item's child.";
+
+		child._index = this._children.length;// FLEX.count(this._item);
+		child._parent = this;
+		this._children.push(child);
 		FLEX.add(this._item, child._item);
 	}
 
-	removeSelf()
+	insert(child: FlexItem, index:number)
 	{
 		this._checkDestroyed();
-		if(this._index < 0)
-			return;
-		let parent = FLEX.parent(this._item);
-		FLEX.delete(parent, this._index);
-		this._index = -1;
+		child._checkDestroyed();
+		if(child._parent)
+			throw "this item is other item's child.";
+		let children = this._children;
+		let len = children.length;
+		if(index < 0 || index > len)
+			throw "index out of range";
+
+		child._index = index;
+		child._parent = this;
+
+		children.push(null);
+
+		for(let i=len; i>index; i--)
+			children[i] = children[i-1];
+		children[index] = child;
+
+		FLEX.insert(this._item, child._item, index);
 	}
 
-	set(value: Partial<FlexItem>)
+	remove(child: FlexItem)
 	{
 		this._checkDestroyed();
-		Object.assign(this, value);
+		child._checkDestroyed();
+		if(child._parent !== this)
+			throw "not a child";
+
+		let arr = this._children;
+		let index = child._index;
+
+		for(let i=index, len = arr.length; i<len; i++)
+			(arr[i] = arr[i+1])._index -= 1;
+		child._parent = null;
+		child._index = -1;
+
+		FLEX.remove(this._item, index);
+	}
+
+	layout()
+	{
+		this._checkDestroyed();
+		FLEX.layout(this._item);
 	}
 
 	destroy()
 	{
 		this._checkDestroyed();
-		if(this._index >= 0)
-			throw "remove self first.";
+		if(this._parent)
+			throw "only root item can be destroyed";
 		FLEX.free(this._item);
+		this._setDestroyed();
+	}
+
+	private _setDestroyed()
+	{
+		let children = this._children;
+
+		this._dirtyFlag = 0;
+		this._parent = null;
+		this._children = null;
+		this._index = -1;
 		this._item = null;
+
+		for(let i=0; i<children.length; i++)
+			children[i]._setDestroyed();
 	}
 
 	private _checkDestroyed()
