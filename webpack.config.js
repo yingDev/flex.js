@@ -3,7 +3,9 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 module.exports = {
 	entry: "./src/index.ts",
 	output: {
-		filename: "index.js"
+		filename: "index.js",
+		library: "jsflex",
+		libraryTarget: "umd"
 	},
 	mode: "production",
 	devtool: "source-map",
