@@ -117,18 +117,18 @@ export class FlexItem
 		const {Size, Location, Padding, Margin, Enums, Misc} = DirtyFlag;
 		let m = <any>this;
 
-		(d & Size) && FLEX.set_size(_item, this.width, this.height);
-		(d & Location) && FLEX.set_location(_item, this.top, this.right, this.bottom, this.left);
-		(d & Padding) && FLEX.set_padding(_item, this.padding_top, this.padding_right, this.padding_bottom, this.padding_left);
-		(d & Margin) && FLEX.set_margin(_item, this.margin_top, this.margin_right, this.margin_bottom, this.margin_left);
+		(d & Size) && FLEX.set_size(_item, m._width, m._height);
+		(d & Location) && FLEX.set_location(_item, m._top, m._right, m._bottom, m._left);
+		(d & Padding) && FLEX.set_padding(_item, m._padding_top, m._padding_right, m._padding_bottom, m._padding_left);
+		(d & Margin) && FLEX.set_margin(_item, m._margin_top, m._margin_right, m._margin_bottom, m._margin_left);
 		(d & Enums) && FLEX.set_enum_props_batch(_item,
-			this.justify_content << 0 |
-			this.align_content   << 4 |
-			this.align_items	 << 8 |
-			this.align_self      << 12|
-			this.position        << 16|
-			this.direction       << 20|
-			this.wrap  		     << 24
+			m._justify_content << 0 |
+			m._align_content   << 4 |
+			m._align_items	   << 8 |
+			m._align_self      << 12|
+			m._position        << 16|
+			m._direction       << 20|
+			m._wrap  		   << 24
 		);
 		(d & Misc) && FLEX.set_misc(m._grow, m._shrink, m._order, m._basis);
 
