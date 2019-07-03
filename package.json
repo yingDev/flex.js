@@ -1,14 +1,17 @@
 {
-  "name": "flex.js",
-  "version": "1.0.0",
+  "name": "jsflex",
+  "version": "0.0.1",
   "description": "",
-  "main": "flex.js",
+  "main": "dist/index.js",
+  "files": ["dist/index.js", "dist/index.d.ts", "dist/index.js.map"],
   "scripts": {
-
+    "publish": "webpack --mode=production && npm publish"
   },
-  "author": "",
+  "author": "yingdev",
+  "repository": "https://github.com/yingDev/flex.js",
   "license": "ISC",
   "devDependencies": {
+    "copy-webpack-plugin": "^5.0.3",
     "ts-loader": "^6.0.4",
     "typescript": "^3.5.2",
     "webpack": "^4.35.2",
