@@ -1,0 +1,17 @@
+{
+  "name": "flex.js",
+  "version": "1.0.0",
+  "description": "",
+  "main": "flex.js",
+  "scripts": {
+
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "ts-loader": "^6.0.4",
+    "typescript": "^3.5.2",
+    "webpack": "^4.35.2",
+    "webpack-cli": "^3.3.5"
+  }
+}
