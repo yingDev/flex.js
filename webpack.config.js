@@ -5,6 +5,7 @@ module.exports = {
 	output: {
 		filename: "index.js"
 	},
+	mode: "production",
 	devtool: "source-map",
 	module: {
 		rules: [
@@ -21,7 +22,7 @@ module.exports = {
 	},
 	plugins: [
 		new CopyWebpackPlugin([
-			'src/index.d.ts'
+			'package.json'
 		])
 	]
 };

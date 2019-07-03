@@ -1,11 +1,10 @@
 {
   "name": "jsflex",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "description": "",
-  "main": "dist/index.js",
-  "files": ["dist/index.js", "dist/index.d.ts", "dist/index.js.map"],
   "scripts": {
-    "publish": "webpack --mode=production && npm publish"
+    "watch": "webpack --watch",
+    "pub": "webpack && cd dist && npm publish"
   },
   "author": "yingdev",
   "repository": "https://github.com/yingDev/jsflex",

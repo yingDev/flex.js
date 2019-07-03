@@ -43,13 +43,13 @@ const dirty = (type:keyof typeof DirtyFlag):any => (target, prop, desc) =>
 	const field = '_'+prop;
 	const flag = DirtyFlag[type];
 	return {
-		get() { return this[field]; },
-		set(value)
+		get: function() { return this[field]; },
+		set: function(value)
 		{
 			if(this[field] === value)
 				return;
 			this[field] = value;
-			this._dirtyFlag &= flag;
+			this._dirtyFlag |= flag;
 		}
 	}
 };
@@ -80,13 +80,13 @@ export class FlexItem
 	@dirty("Margin") margin_top = 0.0;
 	@dirty("Margin") margin_bottom = 0.0;
 
-	@dirty("Enums") justify_content: keyof typeof FlexAlign = "start";
-	@dirty("Enums") align_content: keyof typeof FlexAlign = "stretch";
-	@dirty("Enums") align_items: keyof typeof FlexAlign = "stretch";
-	@dirty("Enums") align_self: keyof typeof FlexAlign = "auto";
-	@dirty("Enums") position: keyof typeof FlexPosition = "relative";
-	@dirty("Enums") direction: keyof typeof FlexDirection = "column";
-	@dirty("Enums") wrap: keyof typeof FlexWrap = "no_wrap";
+	@dirty("Enums") justify_content: FlexAlign = FlexAlign.start;
+	@dirty("Enums") align_content: FlexAlign = FlexAlign.stretch;
+	@dirty("Enums") align_items: FlexAlign = FlexAlign.stretch;
+	@dirty("Enums") align_self: FlexAlign = FlexAlign.auto;
+	@dirty("Enums") position: FlexPosition = FlexPosition.relative;
+	@dirty("Enums") direction: FlexDirection = FlexDirection.column;
+	@dirty("Enums") wrap: FlexWrap = FlexWrap.no_wrap;
 
 	@dirty("Misc") grow = 0.0;
 	@dirty("Misc") shrink = 1.0;
@@ -115,21 +115,22 @@ export class FlexItem
 
 		let {_item} = this;
 		const {Size, Location, Padding, Margin, Enums, Misc} = DirtyFlag;
+		let m = <any>this;
 
 		(d & Size) && FLEX.set_size(_item, this.width, this.height);
 		(d & Location) && FLEX.set_location(_item, this.top, this.right, this.bottom, this.left);
 		(d & Padding) && FLEX.set_padding(_item, this.padding_top, this.padding_right, this.padding_bottom, this.padding_left);
 		(d & Margin) && FLEX.set_margin(_item, this.margin_top, this.margin_right, this.margin_bottom, this.margin_left);
 		(d & Enums) && FLEX.set_enum_props_batch(_item,
-			FlexAlign[this.justify_content] << 0 |
-			FlexAlign[this.align_content]   << 4 |
-			FlexAlign[this.align_items]	    << 8 |
-			FlexAlign[this.align_self]      << 12|
-			FlexPosition[this.position]     << 16|
-			FlexDirection[this.direction]   << 20|
-			FlexWrap[this.wrap]  		    << 24
+			this.justify_content << 0 |
+			this.align_content   << 4 |
+			this.align_items	 << 8 |
+			this.align_self      << 12|
+			this.position        << 16|
+			this.direction       << 20|
+			this.wrap  		     << 24
 		);
-		(d & Misc) && FLEX.set_misc(this.grow, this.shrink, this.order, this.basis);
+		(d & Misc) && FLEX.set_misc(m._grow, m._shrink, m._order, m._basis);
 
 		this._dirtyFlag = 0;
 	}
@@ -191,6 +192,7 @@ export class FlexItem
 	layout()
 	{
 		this._checkDestroyed();
+		this.commitProps();
 		FLEX.layout(this._item);
 	}
 
@@ -223,3 +225,26 @@ export class FlexItem
 			throw "item has been destroyed";
 	}
 }
+
+
+
+
+let btn = document.getElementById("shit");
+btn.addEventListener("click",()=>
+{
+	let a = new FlexItem();
+	let child = new FlexItem();
+	child.width = 100;
+	child.height = 100;
+	child.commitProps();
+	a.add(child);
+
+	a.justify_content = FlexAlign.center;
+	a.align_items = FlexAlign.center;
+	a.width = 123;
+	a.height = 456;
+	a.layout();
+
+	console.log(child.frameX);
+	console.log(child.frameY);
+});
